@@ -28,7 +28,7 @@ namespace {
     Log *logger;
 }
 
-zmq_intf_context zmq_server_intf(unsigned int starting_port, unsigned int local_rank, unsigned int world_size, bool kernel_loopback, Log &log)
+zmq_intf_context zmq_server_intf(unsigned int starting_port, unsigned int local_rank, unsigned int world_size, bool kernel_loopback, const std::vector<std::string> ips, Log &log)
 {
     zmq_intf_context ctx;
 
@@ -39,14 +39,14 @@ zmq_intf_context zmq_server_intf(unsigned int starting_port, unsigned int local_
     ctx.krnl_tx_socket = std::make_unique<zmqpp::socket>(ctx.context, zmqpp::socket_type::pub);
     ctx.krnl_rx_socket = std::make_unique<zmqpp::socket>(ctx.context, zmqpp::socket_type::sub);
 
-    const string endpoint_base = "tcp://127.0.0.1:";
+    const string local_endpoint = "tcp://" + ips.at(local_rank) + ":";
 
-    string cmd_endpoint = endpoint_base + to_string(starting_port + local_rank);
+    string cmd_endpoint = local_endpoint + to_string(starting_port + local_rank);
     *logger << log_level::verbose << "Endpoint: " << cmd_endpoint << endl;
     vector<string> eth_endpoints;
 
     for(int i=0; i<world_size; i++){
-        eth_endpoints.emplace_back(endpoint_base + to_string(starting_port+world_size+i));
+        eth_endpoints.emplace_back("tcp://" + ips.at(i) + ":" + to_string(starting_port+world_size+i));
         *logger << log_level::verbose << "Endpoint rank " << i << ": " << eth_endpoints.at(i) << endl;
     }
 
@@ -72,14 +72,14 @@ zmq_intf_context zmq_server_intf(unsigned int starting_port, unsigned int local_
 
     //kernel interface
     //bind to tx socket
-    string krnl_endpoint = endpoint_base + to_string(starting_port+2*world_size+local_rank);
+    string krnl_endpoint = local_endpoint + to_string(starting_port+2*world_size+local_rank);
     *logger << log_level::info << "Rank " << local_rank << " binding to " << krnl_endpoint << " (KRNL)" << endl;
     ctx.krnl_tx_socket->bind(krnl_endpoint);
     this_thread::sleep_for(chrono::milliseconds(1000));
     //connect to rx socket
     //in case we want to loopback the kernel interface, we connect to the TX sockets for RX
     if(!kernel_loopback){
-        krnl_endpoint = endpoint_base + to_string(starting_port+3*world_size+local_rank);
+        krnl_endpoint = local_endpoint + to_string(starting_port+3*world_size+local_rank);
     }
     *logger << log_level::info << "Rank " << local_rank << " connecting to " << krnl_endpoint << " (KRNL)" << endl;
     ctx.krnl_rx_socket->connect(krnl_endpoint);

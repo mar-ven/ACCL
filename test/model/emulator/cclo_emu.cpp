@@ -450,10 +450,29 @@ int main(int argc, char** argv){
     unsigned int starting_port = atoi(argv[2]);
     
     bool krnl_loopback = false;
-    if(argc == 4 && string(argv[3]) == "loopback"){
+    if(argc >= 4 && string(argv[3]) == "loopback"){
+        cout << "Setting kernel loopback for this emulation session" << endl;
         krnl_loopback = true;
     }
 
-    zmq_intf_context ctx = zmq_server_intf(starting_port, local_rank, world_size, krnl_loopback, logger);
+    //read IPs from file
+    vector<string> ips;
+    if(argc == 5) {
+        ifstream ipfile (argv[4]);
+        cout << "Using hostfile: " << argv[4] << endl;
+        if(ipfile.is_open()) {
+            for(string line; getline(ipfile, line) && (ips.size() < world_size);/**/){
+                cout << line << endl;
+                ips.emplace_back(line);
+            }
+            ipfile.close();
+        }
+    } else {
+        for(int i=0; i<world_size; i++){
+            ips.emplace_back("127.0.0.1");
+        }
+    }
+
+    zmq_intf_context ctx = zmq_server_intf(starting_port, local_rank, world_size, krnl_loopback, ips, logger);
     sim_bd(&ctx, eth_type == "tcp", local_rank, world_size);
 }

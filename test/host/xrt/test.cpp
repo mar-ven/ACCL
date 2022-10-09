@@ -23,6 +23,7 @@
 #include <mpi.h>
 #include <random>
 #include <sstream>
+#include <fstream>
 #include <tclap/CmdLine.h>
 #include <vector>
 #include <vnx/cmac.hpp>
@@ -55,6 +56,7 @@ struct options_t {
   bool axis3;
   bool udp;
   std::string xclbin;
+  std::string ip;
 };
 
 void test_debug(std::string message, options_t &options) {
@@ -1332,7 +1334,7 @@ int start_test(options_t options) {
         networkmem, options.udp ? networkProtocol::UDP : networkProtocol::TCP,
         16, options.rxbuf_size);
   } else {
-    accl = std::make_unique<ACCL::ACCL>(ranks, rank, options.start_port, device,
+    accl = std::make_unique<ACCL::ACCL>(ranks, rank, options.start_port, options.ip, device,
                                         options.udp ? networkProtocol::UDP
                                                     : networkProtocol::TCP,
                                         16, options.rxbuf_size);
@@ -1466,6 +1468,10 @@ options_t parse_options(int argc, char *argv[]) {
       "i", "device-index", "device index of FPGA if hardware mode is used",
       false, 0, "positive integer");
   cmd.add(device_index_arg);
+  TCLAP::ValueArg<std::string> hostfile_arg(
+      "z", "hostfile", "list of IPs corresponding to the ranks", false,
+      "hosts.txt", "file");
+  cmd.add(hostfile_arg);
 
   try {
     cmd.parse(argc, argv);
@@ -1496,6 +1502,32 @@ options_t parse_options(int argc, char *argv[]) {
   opts.device_index = device_index_arg.getValue();
   opts.xclbin = xclbin_arg.getValue();
   opts.test_xrt_simulator = xrt_simulator_ready(opts);
+
+  //read our IP from file at the <rank> line
+  std::vector<std::string> ips;
+
+  if(hostfile_arg.isSet()){
+    std::ifstream ipfile (hostfile_arg.getValue());
+    std::cout << "Using hostfile: " << hostfile_arg.getValue() << std::endl;
+
+    if(ipfile.is_open()) {
+      std::string line;
+      //skip any ranks before us
+      for(int i=0; i<rank; i++){
+        getline(ipfile, line);
+      }
+      //get our own ip from file
+      getline(ipfile, opts.ip);
+      std::cout << "Got IP " << opts.ip << " from hostfile" << std::endl;
+      ipfile.close();
+    } else {
+      throw std::invalid_argument("Cannot open hostfile" + hostfile_arg.getValue());
+    }
+  } else {
+    std::cout << "Hostfile not provided, defaulting to 127.0.0.1" << std::endl;
+    opts.ip = "127.0.0.1";
+  }
+
   return opts;
 }
 

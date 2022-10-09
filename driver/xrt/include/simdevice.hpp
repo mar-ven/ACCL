@@ -36,8 +36,9 @@ public:
    *
    * @param zmqport    Port of simulator or emulator to connect to.
    * @param local_rank The local rank of this process.
+   * @param local_ip   The local IP addresslocal rank of this process.
    */
-  SimDevice(unsigned int zmqport, unsigned int local_rank);
+  SimDevice(unsigned int zmqport, unsigned int local_rank, const std::string local_ip="127.0.0.1");
 
   /**
    * Destroy the Simulated Device object

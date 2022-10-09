@@ -26,9 +26,10 @@
  * @param local_rank The local rank of this process. This will determine actual ports used by ZMQ
  * @param krnl_dest A destination field to attach to data, for routing purposes
  * @param world_size The total number of ranks
+ * @param ip The IP of the local host
  * @return zmq_intf_context A set of ZMQ sockets through which we can talk to the simulator/emulator
  */
-zmq_intf_context zmq_client_intf(  unsigned int starting_port, unsigned int local_rank,
+zmq_intf_context zmq_client_intf(  unsigned int starting_port, unsigned int local_rank, const std::string ip="127.0.0.1",
                                         const std::vector<unsigned int>& krnl_dest=std::vector<unsigned int>(), unsigned int world_size=0);
 
 /**

@@ -41,21 +41,22 @@ ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
 
 // Simulation constructor
 ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
-           unsigned int sim_start_port, networkProtocol protocol, int nbufs,
+           unsigned int sim_start_port, const std::string sim_ip,
+           networkProtocol protocol, int nbufs,
            addr_t bufsize, const arithConfigMap &arith_config)
     : arith_config(arith_config), protocol(protocol), sim_mode(true),
       _devicemem(0), rxbufmem({}), networkmem(0) {
-  cclo = new SimDevice(sim_start_port, local_rank);
+  cclo = new SimDevice(sim_start_port, local_rank, sim_ip);
   initialize_accl(ranks, local_rank, nbufs, bufsize);
 }
 
 ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
-           unsigned int sim_start_port, xrt::device &device,
+           unsigned int sim_start_port, const std::string sim_ip, xrt::device &device,
            networkProtocol protocol, int nbufs, addr_t bufsize,
            const arithConfigMap &arith_config)
     : arith_config(arith_config), protocol(protocol), sim_mode(true),
       _devicemem(0), rxbufmem({}), networkmem(0), device(device) {
-  cclo = new SimDevice(sim_start_port, local_rank);
+  cclo = new SimDevice(sim_start_port, local_rank, sim_ip);
   initialize_accl(ranks, local_rank, nbufs, bufsize);
 }
 

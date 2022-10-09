@@ -24,9 +24,9 @@ using namespace std;
 
 mutex cmd_socket_mutex;
 
-zmq_intf_context zmq_client_intf(unsigned int starting_port, unsigned int local_rank, const vector<unsigned int>& krnl_dest, unsigned int world_size){
+zmq_intf_context zmq_client_intf(unsigned int starting_port, unsigned int local_rank, const string ip, const vector<unsigned int>& krnl_dest, unsigned int world_size){
     zmq_intf_context ctx;
-    const string endpoint_base = "tcp://127.0.0.1:";
+    const string endpoint_base = "tcp://" + ip + ":";
 
     ctx.cmd_socket = std::make_unique<zmqpp::socket>(ctx.context, zmqpp::socket_type::request);
 

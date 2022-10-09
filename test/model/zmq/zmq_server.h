@@ -35,10 +35,11 @@
  * @param local_rank The local rank of this process. This will determine actual ports used by ZMQ
  * @param world_size The total number of ranks
  * @param use_krnl_sockets Flag indicating whether or not to expose kernel data interfaces
+ * @param ips vector of IP addresses corresponding to our ranks
  * @param log Logger
  * @return zmq_intf_context A set of ZMQ sockets through which clients can talk to the simulator/emulator
  */
-zmq_intf_context zmq_server_intf(unsigned int starting_port, unsigned int local_rank, unsigned int world_size, bool use_krnl_sockets, Log &log);
+zmq_intf_context zmq_server_intf(unsigned int starting_port, unsigned int local_rank, unsigned int world_size, bool use_krnl_sockets, const std::vector<std::string> ips, Log &log);
 
 /**
  * @brief Serve configuration memory, device memory, and call requests

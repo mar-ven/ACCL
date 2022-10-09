@@ -72,13 +72,15 @@ public:
    * @param local_rank    Rank of this process
    * @param start_port    First port to use to connect to the ACCL emulator/
    *                      simulator
+   * @param sim_ip        IP address of host where simulator runs
    * @param protocol      Network protocol to use
    * @param nbufs         Amount of buffers to use
    * @param bufsize       Size of buffers
    * @param arith_config  Arithmetic configuration to use
    */
   ACCL(const std::vector<rank_t> &ranks, int local_rank,
-       unsigned int start_port, networkProtocol protocol = networkProtocol::TCP,
+       unsigned int start_port, const std::string sim_ip = "127.0.0.1",
+       networkProtocol protocol = networkProtocol::TCP,
        int nbufs = 16, addr_t bufsize = 1024,
        const arithConfigMap &arith_config = DEFAULT_ARITH_CONFIG);
 
@@ -90,6 +92,7 @@ public:
    * @param local_rank    Rank of this process
    * @param start_port    First port to use to connect to the ACCL emulator/
    *                      simulator
+   * @param sim_ip        IP to use to connect to the ACCL emulator/
    * @param device        Simulated FPGA device from the Vitis emulator
    * @param protocol      Network protocol to use
    * @param nbufs         Amount of buffers to use
@@ -98,7 +101,7 @@ public:
 
    */
   ACCL(const std::vector<rank_t> &ranks, int local_rank,
-       unsigned int start_port, xrt::device &device,
+       unsigned int start_port, const std::string sim_ip, xrt::device &device,
        networkProtocol protocol = networkProtocol::TCP, int nbufs = 16,
        addr_t bufsize = 1024,
        const arithConfigMap &arith_config = DEFAULT_ARITH_CONFIG);
