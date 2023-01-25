@@ -123,10 +123,9 @@ else ifeq (axis3x_vadd,$(MODE))
 	CCLO_STACK_TYPE = TCP
 	CCLO_MB_DEBUG_LEVEL = 2
 else ifeq (tcp, $(MODE))
-	CMAC_TCP_XO=Vitis_with_100Gbps_TCP-IP/_x.hw.$(XSA)/cmac_krnl.xo
-	NET_XO = $(TCP_XO) $(CMAC_TCP_XO)
+	NET_XO = $(TCP_XO) $(CMAC_UDP_XO)
 	OTHER_XO = $(LOOPBACK_XO)
-	CONFIG += --advanced.param compiler.userPostSysLinkOverlayTcl=$(shell pwd)/Vitis_with_100Gbps_TCP-IP/scripts/post_sys_link.tcl
+	CONFIG += --advanced.param compiler.userPostSysLinkOverlayTcl=$(shell pwd)/$(VNX)/Ethernet/post_sys_link.tcl
 	CONFIG += --user_ip_repo_paths Vitis_with_100Gbps_TCP-IP/build/fpga-network-stack/iprepo
 	CCLO_STACK_TYPE = TCP
 else ifeq (roce, $(MODE))
