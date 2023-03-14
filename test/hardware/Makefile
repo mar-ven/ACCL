@@ -131,6 +131,13 @@ else ifeq (tcp, $(MODE))
 	CONFIG += --advanced.param compiler.userPostSysLinkOverlayTcl=$(shell pwd)/Vitis_with_100Gbps_TCP-IP/scripts/post_sys_link.tcl
 	CONFIG += --user_ip_repo_paths Vitis_with_100Gbps_TCP-IP/build/fpga-network-stack/iprepo
 	CCLO_STACK_TYPE = TCP
+else ifeq (tcp_hwemu, $(MODE))
+	CMAC_TCP_XO=$(XILINX_VITIS)/data/emulation/XO/sim_ipc_axis_master_512.xo  $(XILINX_VITIS)/data/emulation/XO/sim_ipc_axis_slave_512.xo
+	NET_XO = $(TCP_XO) $(CMAC_TCP_XO)
+	OTHER_XO = $(LOOPBACK_XO)
+	CONFIG += -t hw_emu
+	CONFIG += --user_ip_repo_paths Vitis_with_100Gbps_TCP-IP/build/fpga-network-stack/iprepo
+	CCLO_STACK_TYPE = TCP
 else ifeq (roce, $(MODE))
 	NET_XO = $(ROCE_XO) $(CMAC_UDP_XO)
 	OTHER_XO = $(LOOPBACK_XO)
