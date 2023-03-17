@@ -32,6 +32,10 @@ proc connect_clk_rst {clksig rstsig rstslr} {
         puts "Inferred shell xilinx_u55c_gen3x16_xdma_2_202110_1 or xilinx_u55c_gen3x16_xdma_3_202210_1"
         connect_bd_net [get_bd_pins proc_sys_reset_kernel_slr${rstslr}/peripheral_aresetn] [get_bd_pins $rstsig]
     }
+    if {![catch { connect_bd_net [get_bd_pins kernel_clk/clk] [get_bd_pins $clksig] } ]} {
+        puts "Inferred hardware emulation"
+        connect_bd_net [get_bd_pins psr_kernel_clk_0/peripheral_aresetn] [get_bd_pins $rstsig]
+    }
 }
 
 # Break existing TCP connections and redo them through an AXI switch
@@ -43,12 +47,12 @@ set_property -dict [list CONFIG.HAS_TSTRB {1} CONFIG.HAS_TKEEP {1}] [get_bd_cell
 set_property -dict [list CONFIG.ARB_ALGORITHM {3}] [get_bd_cells tcp_axis_switch]
 connect_clk_rst tcp_axis_switch/aclk tcp_axis_switch/aresetn 1
 
-delete_bd_objs [get_bd_intf_nets network_krnl_2_net_tx]
-delete_bd_objs [get_bd_intf_nets network_krnl_0_net_tx]
-delete_bd_objs [get_bd_intf_nets network_krnl_1_net_tx]
-connect_bd_intf_net [get_bd_intf_pins network_krnl_0/net_tx] [get_bd_intf_pins tcp_axis_switch/S00_AXIS]
-connect_bd_intf_net [get_bd_intf_pins tcp_axis_switch/M00_AXIS] [get_bd_intf_pins network_krnl_0/net_rx]
-connect_bd_intf_net [get_bd_intf_pins network_krnl_1/net_tx] [get_bd_intf_pins tcp_axis_switch/S01_AXIS]
-connect_bd_intf_net [get_bd_intf_pins tcp_axis_switch/M01_AXIS] [get_bd_intf_pins network_krnl_1/net_rx]
-connect_bd_intf_net [get_bd_intf_pins network_krnl_2/net_tx] [get_bd_intf_pins tcp_axis_switch/S02_AXIS]
-connect_bd_intf_net [get_bd_intf_pins tcp_axis_switch/M02_AXIS] [get_bd_intf_pins network_krnl_2/net_rx]
+delete_bd_objs [get_bd_intf_nets poe_2_net_tx]
+delete_bd_objs [get_bd_intf_nets poe_0_net_tx]
+delete_bd_objs [get_bd_intf_nets poe_1_net_tx]
+connect_bd_intf_net [get_bd_intf_pins poe_0/net_tx] [get_bd_intf_pins tcp_axis_switch/S00_AXIS]
+connect_bd_intf_net [get_bd_intf_pins tcp_axis_switch/M00_AXIS] [get_bd_intf_pins poe_0/net_rx]
+connect_bd_intf_net [get_bd_intf_pins poe_1/net_tx] [get_bd_intf_pins tcp_axis_switch/S01_AXIS]
+connect_bd_intf_net [get_bd_intf_pins tcp_axis_switch/M01_AXIS] [get_bd_intf_pins poe_1/net_rx]
+connect_bd_intf_net [get_bd_intf_pins poe_2/net_tx] [get_bd_intf_pins tcp_axis_switch/S02_AXIS]
+connect_bd_intf_net [get_bd_intf_pins tcp_axis_switch/M02_AXIS] [get_bd_intf_pins poe_2/net_rx]

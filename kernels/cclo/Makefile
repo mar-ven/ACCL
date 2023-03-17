@@ -38,21 +38,14 @@ else ifeq (u280,$(findstring u280, $(PLATFORM)))
 	FPGAPART=xcu280-fsvh2892-2L-e
 else ifeq (u55c,$(findstring u55c, $(PLATFORM)))
 	FPGAPART=xcu55c-fsvh2892-2L-e
+else ifeq (u200,$(findstring u200, $(PLATFORM)))
+	FPGAPART=xcu200-fsgd2104-2-e
 else
 	$(error Unsupported PLATFORM)
 endif
 
 GEN_KERNEL_TCL := tcl/generate_kernel.tcl
 REBUILD_BD_TCL := tcl/rebuild_bd.tcl tcl/control_bd.tcl tcl/rx_bd.tcl tcl/tx_bd.tcl
-
-all: $(CCLO_XO)
-
-.PHONY: xsa
-xsa: $(CCLO_XSA)
-
-$(CCLO_XSA): $(GEN_KERNEL_TCL) $(REBUILD_BD_TCL)
-	$(MAKE) -C hls/ DEVICE=$(FPGAPART)
-	vivado -mode batch -source $< -tclargs $(FPGAPART) $(HW_DEBUG) $(CCLO_XSA) $(STACK_TYPE) $(EN_DMA) $(EN_ARITH) $(EN_COMPRESS) $(EN_EXT_KRNL) $(MB_DEBUG_LEVEL)
 
 OPTIMIZATION=3
 #valid values 0,1,2,3,s,g
@@ -68,7 +61,15 @@ else ifeq ($(OPTIMIZATION),s)
    OPTIMIZATION_STRING = "Optimize for size (-Os)"
 endif
 
-.PHONY: elf simdll xo clean dcp
+.PHONY: elf simdll xo clean dcp xsa
+
+all: $(CCLO_XO)
+
+xsa: $(CCLO_XSA)
+
+$(CCLO_XSA): $(GEN_KERNEL_TCL) $(REBUILD_BD_TCL)
+	$(MAKE) -C hls/ DEVICE=$(FPGAPART)
+	vivado -mode batch -source $< -tclargs $(FPGAPART) $(HW_DEBUG) $(CCLO_XSA) $(STACK_TYPE) $(EN_DMA) $(EN_ARITH) $(EN_COMPRESS) $(EN_EXT_KRNL) $(MB_DEBUG_LEVEL)
 
 elf: $(CCLO_ELF)
 
