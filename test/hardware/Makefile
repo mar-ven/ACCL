@@ -85,6 +85,9 @@ else ifeq (u280,$(findstring u280, $(PLATFORM)))
 else ifeq (u55c,$(findstring u55c, $(PLATFORM)))
 	FPGAPART=xcu55c-fsvh2892-2L-e
 	BOARD=u55c
+else ifeq (u200,$(findstring u200, $(PLATFORM)))
+	FPGAPART=xcu200-fsgd2104-2-e
+	BOARD=u200
 else
 	$(error Unsupported PLATFORM)
 endif
