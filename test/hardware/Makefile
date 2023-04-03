@@ -108,6 +108,7 @@ ifeq (udp,$(MODE))
 	NET_XO = $(CMAC_UDP_XO) $(UDP_XO)
 	OTHER_XO = $(LOOPBACK_XO)
 	CONFIG += --user_ip_repo_paths $(HLS_IP_FOLDER)
+	CMAC_PADDING_MODE = 1
 	CCLO_STACK_TYPE = UDP
 else ifeq (axis3x,$(MODE))
 	ETH_IF := none
@@ -128,11 +129,13 @@ else ifeq (tcp, $(MODE))
 	OTHER_XO = $(LOOPBACK_XO)
 	CONFIG += --advanced.param compiler.userPostSysLinkOverlayTcl=$(shell pwd)/$(VNX)/Ethernet/post_sys_link.tcl
 	CONFIG += --user_ip_repo_paths Vitis_with_100Gbps_TCP-IP/build/fpga-network-stack/iprepo
+	CMAC_PADDING_MODE = 2
 	CCLO_STACK_TYPE = TCP
 else ifeq (roce, $(MODE))
 	NET_XO = $(ROCE_XO) $(CMAC_UDP_XO)
 	OTHER_XO = $(LOOPBACK_XO)
 	CONFIG += --advanced.param compiler.userPostSysLinkOverlayTcl=$(shell pwd)/$(VNX)/Ethernet/post_sys_link.tcl
+	CMAC_PADDING_MODE = 1
 	CCLO_STACK_TYPE = UDP
 else
 	$(error Unsupported MODE)
@@ -147,7 +150,7 @@ vnx: $(CMAC_UDP_XO) $(UDP_XO)
 
 $(CMAC_UDP_XO) &:
 	git submodule update --init --recursive xup_vitis_network_example
-	$(MAKE) -C xup_vitis_network_example/Ethernet DEVICE=$(PLATFORM) INTERFACE=$(ETH_IF) all
+	$(MAKE) -C xup_vitis_network_example/Ethernet DEVICE=$(PLATFORM) INTERFACE=$(ETH_IF) PADDING_MODE=$(CMAC_PADDING_MODE) all
 
 $(UDP_XO):
 	git submodule update --init --recursive xup_vitis_network_example
