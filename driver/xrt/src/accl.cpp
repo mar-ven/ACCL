@@ -27,11 +27,8 @@
 #define NETWORK_BUF_SIZE (64 << 20)
 
 namespace ACCL {
-ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
-           xrt::device &device, xrt::ip &cclo_ip, xrt::kernel &hostctrl_ip,
+ACCL::ACCL(xrt::device &device, xrt::ip &cclo_ip, xrt::kernel &hostctrl_ip,
            int devicemem, const std::vector<int> &rxbufmem,
-           int n_egr_rx_bufs, addr_t egr_rx_buf_size,
-           addr_t max_egr_size, addr_t max_rndzv_size,
            const arithConfigMap &arith_config)
     : arith_config(arith_config), sim_mode(false),
       _devicemem(devicemem), rxbufmem(rxbufmem) {
@@ -39,19 +36,7 @@ ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
 }
 
 // Simulation constructor
-ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
-           unsigned int sim_start_port, int n_egr_rx_bufs,
-           addr_t egr_rx_buf_size, addr_t max_egr_size,
-           addr_t max_rndzv_size, const arithConfigMap &arith_config)
-    : arith_config(arith_config), sim_mode(true),
-      _devicemem(0), rxbufmem({}) {
-  cclo = new SimDevice(sim_start_port, local_rank);
-}
-
-ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
-           unsigned int sim_start_port, xrt::device &device,
-           int n_egr_rx_bufs, addr_t egr_rx_buf_size,
-           addr_t max_egr_size, addr_t max_rndzv_size,
+ACCL::ACCL(unsigned int sim_start_port, unsigned int local_rank,
            const arithConfigMap &arith_config)
     : arith_config(arith_config), sim_mode(true),
       _devicemem(0), rxbufmem({}) {
@@ -59,13 +44,11 @@ ACCL::ACCL(const std::vector<rank_t> &ranks, int local_rank,
 }
 
 // constructor for coyote fpga device
-ACCL::ACCL(CoyoteDevice *dev, const std::vector<rank_t> &ranks, int local_rank,
-        int n_egr_rx_bufs, addr_t egr_rx_buf_size,
-        addr_t max_egr_size, addr_t max_rndzv_size,
-        const arithConfigMap &arith_config)
+ACCL::ACCL(CoyoteDevice *dev, const arithConfigMap &arith_config)
   : arith_config(arith_config), sim_mode(false),
     _devicemem(0), rxbufmem(0), cclo(dev) {}
 
+// destructor
 ACCL::~ACCL() {
   deinit();
   delete cclo;
@@ -1455,7 +1438,7 @@ void ACCL::free_request(ACCLRequest *request) {
 
 ACCLRequest *ACCL::call_async(CCLO::Options &options) {
   if (!config_rdy && options.scenario != operation::config) {
-    throw std::runtime_error("CCLO not configured, cannot call");
+    throw std::runtime_error("CCLO not configured, cannot call. Please make sure that you are invoking initialize().");
   }
 
   prepare_call(options);
@@ -1465,7 +1448,7 @@ ACCLRequest *ACCL::call_async(CCLO::Options &options) {
 
 ACCLRequest *ACCL::call_sync(CCLO::Options &options) {
   if (!config_rdy && options.scenario != operation::config) {
-    throw std::runtime_error("CCLO not configured, cannot call");
+    throw std::runtime_error("CCLO not configured, cannot call. Please make sure that you are invoking initialize().");
   }
 
   prepare_call(options);
